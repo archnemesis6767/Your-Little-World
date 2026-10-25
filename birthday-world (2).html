@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>a little world, just for you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Fraunces:ital,wght@0,500;1,500&family=Newsreader:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bl:#F8E7ED;--lv:#E8DFF5;--cr:#FFF5E9;--bu:#260D19;--su:#F4DFA8;--pk:#E7A3BE;--sg:#8FA583;--d:'Fraunces','Iowan Old Style',Georgia,serif;--b:'Newsreader',Georgia,serif;--h:'Caveat','Segoe Script','Bradley Hand',cursive}
+html,body{margin:0;height:100%;background:var(--bu);color:var(--bu);font:clamp(17px,1vw + 14px,20px)/1.6 var(--b)}
+.scene{position:fixed;inset:0;overflow:auto;opacity:0;visibility:hidden;transition:opacity .9s,visibility 0s .9s;display:flex;flex-direction:column;align-items:center;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))}
+.scene.on{opacity:1;visibility:visible;transition-delay:0s}
+.scene::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+h1,h2,h3{font-family:var(--d);font-weight:500;margin:0;line-height:1.2}
+.hand{font-family:var(--h);font-size:1.35em;line-height:1.2}
+.btn{font:500 1rem var(--d);background:var(--bu);color:var(--cr);border:2px solid var(--bu);border-radius:999px;padding:.6em 1.3em;min-height:48px;cursor:pointer;box-shadow:3px 3px 0 var(--pk);transition:transform .2s}
+.btn:hover:not(:disabled){transform:translateY(-2px) rotate(-1deg)}
+.btn.alt{background:var(--cr);color:var(--bu)}.btn:disabled{opacity:.55;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+:focus-visible{outline:3px solid var(--su);box-shadow:0 0 0 6px var(--bu);border-radius:6px}
+.i{stroke:var(--bu);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+svg{display:block;max-width:100%}
+.hid{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+[hidden]{display:none!important}
+/* gate */
+#gate{background:linear-gradient(var(--bl),var(--lv) 70%,var(--cr))}
+#gate p{font:italic 500 clamp(1.25rem,4.6vw,2rem)/1.35 var(--d);text-align:center;max-width:22em;margin:2vh 0 0}
+#gate svg{height:min(58svh,520px);width:auto;margin-top:2vh}
+.dl,.dr{transition:transform 1.4s cubic-bezier(.5,0,.2,1)}.dl{transform-origin:100px 0}.dr{transform-origin:300px 0}
+#gate.open .dl,#gate.open .dr{transform:scaleX(.1)}
+.glow{animation:gl 3s ease-in-out infinite alternate}@keyframes gl{to{opacity:.6}}
+/* bouquet */
+#bouq{background:linear-gradient(var(--bl),var(--cr));justify-content:center}
+#bouq h1{font-size:clamp(1.5rem,5vw,2.4rem);text-align:center}
+#bq{width:min(86vw,420px);height:auto;transform-origin:50% 90%}
+.pop{transform-box:fill-box;transform-origin:center;animation:pop .9s cubic-bezier(.3,1.4,.5,1) both;animation-delay:calc(var(--i)*.14s + .3s)}
+@keyframes pop{from{transform:scale(0) rotate(-40deg)}}
+#bq.bloom{animation:bl 1.2s ease}@keyframes bl{40%{transform:scale(1.1)}}
+#rib{stroke-dasharray:700;stroke-dashoffset:700;fill:none}#bq.wrap #rib{animation:dr 1.6s ease forwards}@keyframes dr{to{stroke-dashoffset:0}}
+.p{position:fixed;width:13px;height:17px;background:var(--pk);border:1px solid var(--bu);border-radius:80% 0 80% 0;pointer-events:none;z-index:60}
+.p.b{animation:bu 1.8s ease-out forwards}@keyframes bu{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.p.f{top:-30px;animation:fa linear forwards}@keyframes fa{to{transform:translate(var(--dx),110vh) rotate(540deg)}}
+/* town */
+#town{background:var(--lv);justify-content:flex-start}
+#town svg{width:min(100%,560px,calc(100svh - 150px));height:auto;border:2px solid var(--bu);border-radius:14px;margin-top:4px}
+.hs{cursor:pointer;transition:transform .25s}.hs:hover{transform:translateY(-3px)}
+.hs .hit{fill:transparent;stroke:none}
+#note{min-height:3.2em;text-align:center;max-width:30em;margin:8px 0 0}
+.pulse{animation:pu 2.4s ease-in-out infinite}@keyframes pu{50%{opacity:.45}}
+#cars{transition:transform 3s ease-in-out}#cars.go{transform:translateX(330px)}
+.sk{stroke-dasharray:160;stroke-dashoffset:160}.sk.on{transition:stroke-dashoffset 2s;stroke-dashoffset:0}
+.mouth{transform-box:fill-box;transform-origin:top;transition:transform .4s}.yawn .mouth{transform:scale(1.8,4)}
+.eye,.cb{transform-box:fill-box;transition:transform .25s}.eye{transform-origin:center}.cb{transform-origin:50% 100%}
+.yawn .eye,.blink .eye{transform:scaleY(.12)}.stretch .cb{transform:scale(1.2,.85)}
+.bub{opacity:0;transition:opacity .3s;pointer-events:none}.say .bub{opacity:1}
+.dd *{fill:none;stroke:#7b6870;stroke-width:1.1;stroke-dasharray:2 1.5;stroke-linecap:round;transition:fill .8s,stroke .8s}
+.dd.c *{stroke:#260D19;stroke-dasharray:none;fill:var(--f)}
+.pal button[aria-pressed=true]{background:var(--su);box-shadow:inset 0 -4px 0 var(--bu)}
+#pg{width:100%;height:auto;border-radius:6px;cursor:crosshair;touch-action:manipulation}#pg .it{cursor:pointer}
+#pg .car{display:none;fill:none;stroke:#260D19;stroke-dasharray:3 3}#pg:focus-visible .car{display:inline}
+.tv .fl{opacity:0}.tv.on .fl{opacity:1;animation:pu 1s infinite}
+.nt{animation:nt 1.6s ease-out forwards;opacity:0}@keyframes nt{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-34px)}}
+/* dialogs */
+dialog{border:2px solid var(--bu);background:var(--cr);color:var(--bu);border-radius:16px;width:min(94vw,560px);max-height:92svh;padding:18px;box-shadow:6px 6px 0 var(--pk)}
+dialog::backdrop{background:rgba(38,13,25,.72)}
+dialog h2{font-size:1.5rem;margin-bottom:6px}
+.pal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pal button{font:inherit;background:var(--bl);border:2px solid var(--bu);border-radius:12px;padding:6px 2px;min-height:64px;cursor:pointer;font-size:.8rem;display:flex;flex-direction:column;align-items:center}
+.fv{cursor:pointer}.fv:hover{opacity:.8}
+.opt{display:block;width:100%;text-align:left;font:inherit;background:var(--bl);border:2px solid var(--bu);border-radius:12px;padding:.6em .9em;margin:8px 0;min-height:48px;cursor:pointer}
+.opt:disabled{opacity:1;cursor:default}.opt.ok{background:var(--su)}.opt.no{background:var(--lv);text-decoration:line-through}
+.bar{height:10px;border:2px solid var(--bu);border-radius:9px;overflow:hidden;background:var(--cr)}.bar i{display:block;height:100%;background:var(--bu);transition:width .4s}
+.ho{cursor:pointer}.ho.found{opacity:.35;animation:fd .7s}@keyframes fd{50%{transform:translateY(-12px) scale(1.3)}}
+.ho.found{pointer-events:none}
+#left li{display:inline-block;margin:2px 8px 2px 0}.fnd{text-decoration:line-through}
+#bonus{transform-box:fill-box;transform-origin:50% 100%;animation:pop 1.2s both}
+/* letter */
+#letter{background:radial-gradient(ellipse at 50% 20%,#5b2b3c,var(--bu) 70%);color:var(--cr);justify-content:flex-start}
+#env{background:none;border:0;cursor:pointer;margin:12vh 0 0;color:var(--cr);font:inherit;text-align:center}
+#paper{background:var(--cr);color:var(--bu);width:min(100%,34rem);margin:5vh 0 0;padding:clamp(22px,6vw,48px);border:2px solid var(--bu);outline:6px double var(--pk);outline-offset:-14px;border-radius:4px;box-shadow:0 20px 60px #0008;animation:un 1.6s ease both}
+@keyframes un{from{opacity:0;transform:translateY(30px) scaleY(.85)}}
+#lt{white-space:pre-wrap;margin:0;font-size:clamp(1.02rem,.5vw + .95rem,1.2rem);line-height:1.85;hyphens:manual;overflow-wrap:break-word}
+.lb{margin:28px 0 8vh}
+/* ring */
+#ring{background:radial-gradient(circle at 50% 40%,#4a1d31,var(--bu) 75%);color:var(--cr);justify-content:center;text-align:center}
+#ring h2{font:italic 500 1.7rem var(--d);margin-bottom:6px}
+#rb{background:none;border:0;cursor:pointer;padding:0}
+.lid{transform-origin:70px 120px;transition:transform 1s cubic-bezier(.3,1.3,.5,1)}#rb.open .lid{transform:rotate(-72deg)}
+.l1,.l2{opacity:0;transition:opacity 1.4s;font:500 clamp(1.15rem,4.5vw,1.6rem)/1.4 var(--d);min-height:1.5em;margin:6px 0}.l1.on,.l2.on{opacity:1}
+.sp{opacity:0}#rb.open .sp{animation:sp 1.2s 2s both}@keyframes sp{50%{opacity:1;transform:scale(1.4)}to{opacity:.8}}
+/* end */
+#end{background:linear-gradient(#3b1a40,#6a2d4c 60%,#c98aa0);color:var(--cr);justify-content:center;text-align:center}
+#end h2{font-size:clamp(1.8rem,7vw,3rem)}#end p{max-width:24em}
+.thread{stroke-dasharray:6 8;animation:th 10s linear infinite}@keyframes th{to{stroke-dashoffset:-140}}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sw 5s ease-in-out infinite alternate}@keyframes sw{to{transform:rotate(3deg)}}
+.tw{animation:pu 3s infinite}
+#bow{position:fixed;left:0;top:0;z-index:100;pointer-events:none;display:none;opacity:0;transition:opacity .3s}
+#bow svg{transition:transform .2s}#bow.hot svg{transform:scale(1.4) rotate(12deg)}
+#intro{position:fixed;inset:0;z-index:300;background:#000;display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity 1.6s ease;cursor:pointer}
+#intro.out{opacity:0;pointer-events:none}
+#intro p{color:var(--cr);font:italic 500 clamp(1.3rem,5vw,2.2rem)/1.4 var(--d);text-align:center;max-width:20em;margin:0;opacity:0;transition:opacity 1.8s ease}
+#intro.in p{opacity:1}
+@media(pointer:fine){#bow{display:block}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="intro" aria-hidden="true"><p>i cant give you the world quite yet, so i decided to make one just for you aimo.</p></div>
+<main>
+<!-- OPENING -->
+<section class="scene on" id="gate" aria-labelledby="gh">
+<h1 id="gh" class="hid" data-h>a little world, just for you</h1>
+<p>i cant give you the world quite yet, so i decided to make one just for you aimo.</p>
+<svg viewBox="0 0 400 420" role="img" aria-label="A garden gate in a hedge, warm light glowing behind it">
+<rect width="400" height="420" fill="#FFF5E9" opacity="0"/>
+<g class="i"><path d="M0 260Q100 200 200 240T400 220V420H0Z" fill="#B9CBAA"/><rect x="95" y="90" width="210" height="300" rx="4" fill="#FFF5E9"/>
+<path d="M100 390V220Q200 100 300 220V390Z" fill="#F4DFA8"/><path d="M150 390L200 250L250 390Z" fill="#F8E7ED"/></g>
+<path class="glow" d="M120 380V230Q200 130 280 230V380Z" fill="#fff" opacity=".7"/>
+<g class="i"><rect x="170" y="190" width="60" height="50" fill="#F4DFA8"/><path d="M160 190L200 150L240 190Z" fill="#260D19"/></g>
+<g class="i dl"><path d="M100 390V225Q130 170 200 150V390Z" fill="#E8DFF5"/><path d="M130 390V230M160 390V190M100 300H200" fill="none"/></g>
+<g class="i dr"><path d="M300 390V225Q270 170 200 150V390Z" fill="#E8DFF5"/><path d="M270 390V230M240 390V190M200 300H300" fill="none"/></g>
+<g class="i"><rect x="82" y="110" width="22" height="290" rx="4" fill="#B9CBAA"/><rect x="296" y="110" width="22" height="290" rx="4" fill="#B9CBAA"/>
+<path d="M92 130c-30-10-50 30-20 40M308 130c30-10 50 30 20 40" fill="none"/></g>
+<g class="i"><circle cx="80" cy="150" r="9" fill="#E7A3BE"/><circle cx="322" cy="190" r="9" fill="#F8E7ED"/><circle cx="88" cy="220" r="8" fill="#F4DFA8"/><path d="M200 395Q215 410 200 420M200 395Q185 410 200 420" fill="#260D19"/></g>
+</svg>
+<div class="row"><button class="btn" id="open">open the gate ♡</button></div>
+</section>
+
+<!-- BOUQUET -->
+<section class="scene" id="bouq" inert aria-labelledby="bh">
+<h1 id="bh" data-h>these are for you, beautiful ♡</h1>
+<svg id="bq" viewBox="0 0 400 420" role="img" aria-label="A bouquet of pink lilies, white roses, pink roses and sunflowers wrapped in paper with a burgundy ribbon"></svg>
+<div class="row"><button class="btn" data-acc="plain">accept flowers ♡</button><button class="btn alt" data-acc="love">accept flowers with love ♡</button></div>
+</section>
+
+<!-- TOWN -->
+<section class="scene" id="town" inert aria-labelledby="th">
+<h1 id="th" class="hid" data-h>the garden town</h1>
+<svg viewBox="0 0 560 560" role="group" aria-label="A little garden town in the late afternoon with several places to explore">
+<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8DFF5"/><stop offset=".5" stop-color="#F8E7ED"/><stop offset="1" stop-color="#FFF5E9"/></linearGradient></defs>
+<rect width="560" height="560" fill="url(#sk)"/>
+<circle class="i" cx="110" cy="100" r="34" fill="#F4DFA8"/>
+<path class="i" d="M0 300Q120 220 260 285T560 260V560H0Z" fill="#D9CBEF"/><path class="i" d="M0 345Q160 300 300 335T560 320V560H0Z" fill="#B9CBAA"/>
+<path d="M300 470Q260 410 310 380T250 340" stroke="#FFF5E9" stroke-width="30" fill="none" stroke-linecap="round" opacity=".9"/>
+<!-- studio -->
+<g class="hs" data-a="studio" tabindex="0" role="button" aria-label="Art studio window"><rect class="hit" x="20" y="160" width="170" height="170"/>
+<g class="i"><rect x="35" y="195" width="145" height="125" fill="#FFF5E9"/><path d="M25 200L107 140L190 200Z" fill="#260D19"/><rect x="60" y="225" width="70" height="55" fill="#F4DFA8"/><path d="M95 225V280M60 252H130" fill="none"/><rect x="140" y="260" width="30" height="60" fill="#E7A3BE"/></g>
+<rect x="66" y="230" width="58" height="44" fill="#fff"/>
+<g class="dd" style="--f:#F4DFA8"><circle cx="78" cy="242" r="5"/><path d="M78 247V257"/></g>
+<g class="dd" style="--f:#E7A3BE"><path d="M104 242L96 237V247ZM104 242L112 237V247Z"/></g>
+<g class="dd" style="--f:#c2334d"><path d="M76 269V265Q78 261 84 261H92Q96 261 97 265V269Z"/><circle cx="80" cy="270" r="1.8"/><circle cx="92" cy="270" r="1.8"/></g>
+<g class="dd" style="--f:#E8DFF5"><path d="M110 269l-6-6a3 3 0 014-4l2 2 2-2a3 3 0 014 4z"/></g>
+<path class="sk" d="M82 254q4-5 8 0t8 0 8 0 8 0" fill="none" stroke="#260D19" stroke-width="1.3"/></g>
+<!-- tv hut -->
+<g class="hs tv" data-a="tv" tabindex="0" role="button" aria-label="Little hut with a glowing screen"><rect class="hit" x="205" y="205" width="100" height="125"/>
+<g class="i"><rect x="215" y="235" width="80" height="85" fill="#FFF5E9"/><path d="M208 240L255 205L302 240Z" fill="#260D19"/><rect x="226" y="252" width="58" height="42" rx="6" fill="#8FA583"/></g>
+<path class="fl i" d="M248 262h14l8 20h-30z" fill="#F4DFA8"/></g>
+<!-- cat -->
+<g class="hs" data-a="cat" tabindex="0" role="button" aria-label="Sleepy pink cat on the roof"><rect class="hit" x="186" y="140" width="140" height="90"/>
+<g class="bub"><path class="i" d="M247 172L255 185L263 172" fill="#FFF5E9"/><rect class="i" x="188" y="146" width="134" height="26" rx="8" fill="#FFF5E9"/><path d="M249 171h12" stroke="#FFF5E9" stroke-width="3"/><text x="255" y="164" text-anchor="middle" font-family="Caveat,cursive" font-size="14" fill="#260D19" textLength="118" lengthAdjust="spacingAndGlyphs">yawning aarhin haaaww</text></g>
+<g class="cb i"><ellipse cx="255" cy="206" rx="22" ry="14" fill="#F8E7ED"/><path d="M238 196L240 180L250 190M272 196L270 180L260 190" fill="#F8E7ED"/><path d="M262 188l9-4 0 9z" fill="#E7A3BE"/><ellipse class="eye" cx="247" cy="197" rx="1.8" ry="2.4" fill="#260D19" stroke="none"/><ellipse class="eye" cx="263" cy="197" rx="1.8" ry="2.4" fill="#260D19" stroke="none"/><ellipse class="mouth" cx="255" cy="201" rx="3" ry="2" fill="#260D19"/></g></g>
+<!-- letter cottage -->
+<g class="hs" data-a="letter" tabindex="0" role="button" aria-label="The lit window. The letter is waiting here."><rect class="hit" x="325" y="140" width="200" height="190"/>
+<g class="i"><rect x="345" y="195" width="160" height="125" fill="#FFF5E9"/><path d="M332 200L425 140L518 200Z" fill="#260D19"/><rect x="390" y="225" width="70" height="60" fill="#F4DFA8"/><path d="M425 225V285M390 255H460" fill="none"/><rect x="360" y="260" width="22" height="60" fill="#E7A3BE"/></g>
+<circle class="pulse" cx="425" cy="255" r="52" fill="#F4DFA8" opacity=".5"/><text x="425" y="130" text-anchor="middle" font-family="Caveat,cursive" font-size="22" fill="#260D19">the lit window ♡</text></g>
+<!-- stall: arrange -->
+<g class="hs" data-a="arr" tabindex="0" role="button" aria-label="Flower stall: arrange flowers"><rect class="hit" x="25" y="340" width="130" height="100"/>
+<g class="i"><rect x="35" y="385" width="110" height="40" fill="#E8DFF5"/><path d="M30 385L45 365H135L150 385Z" fill="#260D19"/><circle cx="62" cy="360" r="11" fill="#F4DFA8"/><circle cx="90" cy="356" r="11" fill="#fff"/><circle cx="118" cy="360" r="11" fill="#E7A3BE"/></g></g>
+<!-- guitar -->
+<g class="hs" data-a="guitar" tabindex="0" role="button" aria-label="Music corner with an acoustic guitar"><rect class="hit" x="195" y="335" width="110" height="90"/>
+<g class="i"><rect x="200" y="395" width="100" height="12" fill="#E8DFF5"/><path d="M210 407v14M290 407v14" fill="none"/><g transform="rotate(14 250 370)"><ellipse cx="250" cy="385" rx="22" ry="17" fill="#F4DFA8"/><ellipse cx="250" cy="365" rx="15" ry="13" fill="#F4DFA8"/><circle cx="250" cy="378" r="6" fill="#260D19"/><path d="M247 355V322H253V355" fill="#260D19"/></g></g><g id="gn"></g><g aria-hidden="true" style="pointer-events:none"><circle class="pulse" cx="292" cy="384" r="14" fill="#E7A3BE" opacity=".4"/><path class="i" d="M292 372l5 7-2 14h-6l-2-14z" fill="#6c4fa0"/><path d="M292 372l-2 7 2 14" stroke="#E7A3BE" fill="none" stroke-width="1.3"/></g></g>
+<!-- easel -->
+<g class="hs" data-a="art" tabindex="0" role="button" aria-label="Easel: the little art studio"><rect class="hit" x="340" y="335" width="95" height="120"/>
+<g class="i"><path d="M385 350L360 430M385 350L410 430M385 385V430" fill="none"/><rect x="360" y="352" width="50" height="40" fill="#fff"/></g>
+<path d="M368 380q6-12 12 0t12 0" stroke="#E7A3BE" stroke-width="3" fill="none"/><circle cx="398" cy="364" r="5" fill="#F4DFA8"/><text x="385" y="448" text-anchor="middle" font-family="Caveat,cursive" font-size="20" fill="#260D19">draw?</text></g>
+<!-- hunt -->
+<g class="hs" data-a="hunt" tabindex="0" role="button" aria-label="Hedge archway to a hidden garden"><rect class="hit" x="440" y="335" width="100" height="100"/>
+<g class="i"><path d="M450 430V380Q490 330 530 380V430Z" fill="#8FA583"/><path d="M470 430V390Q490 365 510 390V430Z" fill="#F4DFA8"/><circle cx="458" cy="385" r="6" fill="#E7A3BE"/><circle cx="522" cy="392" r="6" fill="#fff"/></g></g>
+<!-- sign + memo -->
+<g role="img" aria-label="Hand-painted sign: Scenic Route, worth the detour." style="pointer-events:none"><path class="i" d="M230 466V490" stroke-width="5" fill="none"/><path class="i" d="M176 433Q230 426 286 434L284 466Q230 472 178 465Z" fill="#FFF5E9"/><text x="231" y="449" text-anchor="middle" font-family="Caveat,cursive" font-size="17" fill="#260D19" textLength="82" lengthAdjust="spacingAndGlyphs">Scenic Route</text><text x="231" y="462" text-anchor="middle" font-family="Caveat,cursive" font-size="12" fill="#7a1f45" textLength="70" lengthAdjust="spacingAndGlyphs">worth the detour.</text></g>
+<g class="hs" data-a="memo" tabindex="0" role="button" aria-label="A folded paper quiz she made for me"><rect class="hit" x="292" y="428" width="48" height="48"/>
+<g class="i" transform="rotate(-8 316 452)"><rect x="304" y="438" width="24" height="28" fill="#fff"/><path d="M308 444h16" fill="none" stroke-width="1.2"/></g><circle class="i" cx="316" cy="457" r="5" fill="#fff" stroke-width="1.2"/><path d="M316 454l2.5 1.8-1 3h-3l-1-3z" fill="#260D19"/></g>
+<!-- road -->
+<rect x="0" y="490" width="560" height="70" fill="#4a2236"/><path d="M0 525H560" stroke="#FFF5E9" stroke-width="3" stroke-dasharray="22 16"/>
+<g class="hs" id="carh" data-a="car" tabindex="0" role="button" aria-label="Two little cars on the road"><rect class="hit" x="20" y="470" width="190" height="70"/>
+<g id="cars"><g class="i"><path d="M30 520V505Q35 490 55 490H80Q100 490 105 505V520Z" fill="#c2334d"/><circle cx="48" cy="522" r="8" fill="#260D19"/><circle cx="90" cy="522" r="8" fill="#260D19"/><rect x="58" y="496" width="26" height="12" fill="#FFF5E9"/><circle cx="65" cy="502" r="4" fill="#fff" style="stroke-width:1"/><circle cx="77" cy="502" r="4" fill="#fff" style="stroke-width:1"/><circle cx="66" cy="502" r="1.6" fill="#260D19" style="stroke:none"/><circle cx="78" cy="502" r="1.6" fill="#260D19" style="stroke:none"/></g>
+<g class="i"><path d="M125 520V508Q130 494 150 494H170Q188 494 192 508V520Z" fill="#7aa0d6"/><circle cx="142" cy="522" r="8" fill="#260D19"/><circle cx="178" cy="522" r="8" fill="#260D19"/><rect x="146" y="499" width="22" height="10" fill="#FFF5E9"/></g></g></g>
+</svg>
+<p id="note" class="hand" role="status">wander around. when you're ready, the lit window has something for you.</p>
+</section>
+
+<!-- LETTER -->
+<section class="scene" id="letter" inert aria-labelledby="lh">
+<h2 id="lh" class="hand" data-h style="margin-top:4vh">for you</h2>
+<button id="env" aria-label="Open the letter"><svg width="220" viewBox="0 0 220 150"><g class="i"><rect x="5" y="10" width="210" height="135" rx="5" fill="#FFF5E9"/><path d="M5 12L110 85L215 12" fill="#F8E7ED"/><circle cx="110" cy="85" r="17" fill="#6a1b3a"/></g><path d="M102 85h16M110 77v16" stroke="#F8E7ED" stroke-width="2"/></svg><br>tap to open</button>
+<article id="paper" hidden tabindex="-1" aria-label="The letter"><p id="lt"></p><div id="sent" style="height:2px"></div></article>
+<div class="lb"><button class="btn alt" data-go="town">back to the garden</button> <button class="btn" id="last" hidden>one last thing ♡</button></div>
+</section>
+
+<!-- RING -->
+<section class="scene" id="ring" inert aria-labelledby="rh">
+<h2 id="rh" data-h>one last thing ♡</h2>
+<p id="rhint" class="hand">a tiny box is waiting. tap it.</p>
+<button id="rb" aria-label="Open the little burgundy box"><svg width="220" viewBox="0 0 180 170" aria-hidden="true">
+<g class="i"><rect x="30" y="115" width="120" height="45" rx="6" fill="#7a1f45"/><rect x="40" y="105" width="100" height="14" fill="#FFF5E9"/><ellipse cx="90" cy="108" rx="40" ry="5" fill="#a03a62"/></g>
+<g class="lid i"><rect x="30" y="68" width="120" height="52" rx="8" fill="#7a1f45"/><path d="M90 68V120" fill="none" stroke="#F4DFA8"/><path d="M90 68q-18-22-26-4t26 4q18-22 26-4t-26 4" fill="#F4DFA8"/></g>
+<g class="sp"><path d="M90 85l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#F4DFA8"/></g></svg></button>
+<p class="l1" id="l1" aria-live="polite"></p><p class="l2" id="l2" aria-live="polite"></p>
+<button class="btn alt" id="cont" hidden>continue</button>
+</section>
+
+<!-- END -->
+<section class="scene" id="end" inert aria-labelledby="eh">
+<svg viewBox="0 0 400 260" width="min(92vw,460px)" role="img" aria-label="The garden gate seen from inside at evening, a sunflower growing beside the path, and a burgundy ribbon leading to a warm window">
+<g class="tw" fill="#F4DFA8"><circle cx="50" cy="30" r="2"/><circle cx="150" cy="18" r="2"/><circle cx="300" cy="35" r="2"/><circle cx="360" cy="15" r="2"/></g>
+<path class="i" d="M0 170Q100 120 200 150T400 130V260H0Z" fill="#4a2a5a"/><path class="i" d="M0 215Q200 180 400 210V260H0Z" fill="#6f8a66"/>
+<g class="i"><rect x="290" y="95" width="90" height="75" fill="#FFF5E9"/><path d="M282 98L335 60L388 98Z" fill="#260D19"/><rect x="315" y="115" width="38" height="34" fill="#F4DFA8"/></g>
+<g class="i"><rect x="60" y="100" width="12" height="110" fill="#8FA583"/><rect x="170" y="100" width="12" height="110" fill="#8FA583"/><path d="M72 205V125Q121 85 170 125V205" fill="#E8DFF5" opacity=".35"/><path d="M72 205V140L100 150V205M170 205V140L142 150V205" fill="#E8DFF5"/></g>
+<path class="thread" d="M121 207Q200 190 260 205T334 150" fill="none" stroke="#c2334d" stroke-width="3"/>
+<g class="sway"><path class="i" d="M230 215V160" stroke="#8FA583" stroke-width="4" fill="none"/><g transform="translate(230 150)"><g class="i" fill="#F4DFA8"><ellipse cy="-12" rx="5" ry="10"/><ellipse cy="-12" rx="5" ry="10" transform="rotate(60)"/><ellipse cy="-12" rx="5" ry="10" transform="rotate(120)"/><ellipse cy="-12" rx="5" ry="10" transform="rotate(180)"/><ellipse cy="-12" rx="5" ry="10" transform="rotate(240)"/><ellipse cy="-12" rx="5" ry="10" transform="rotate(300)"/><circle r="7" fill="#7a1f45"/></g></g></g>
+</svg>
+<h2 id="eh" data-h>happy birthday, aimo.</h2>
+<p>the gate opens both ways. come wander back into the garden whenever you like.</p>
+<div class="row"><button class="btn alt" data-go="town">wander the garden again</button><button class="btn" id="again" style="background:none;color:var(--cr);border-color:var(--cr);box-shadow:none">from the beginning</button></div>
+</section>
+</main>
+
+<dialog id="d-arr" aria-labelledby="ta"><h2 id="ta">the flower stall</h2><p>tap a flower to add it. tap one in the vase to take it out.</p>
+<svg id="vs" viewBox="0 0 400 400" role="group" aria-label="Vase of flowers"></svg>
+<div class="pal" id="pal"></div><p id="vm" class="hand" role="status" style="margin:8px 0"></p>
+<div class="row"><button class="btn" id="vdone">i'm finished</button><button class="btn alt" id="vclr">clear vase</button><button class="btn alt" data-close>back</button></div></dialog>
+
+<dialog id="d-art" aria-labelledby="tq"><h2 id="tq">the little studio</h2><p id="am" class="hand" role="status" style="margin:0">pick something, then tap the page.</p>
+<svg id="pg" viewBox="0 0 400 280" tabindex="0" role="button" aria-label="Drawing page. Tap or press Enter to place the chosen decoration. Arrow keys move the spot."></svg>
+<div id="atools"><div class="pal" id="tl"></div><div class="pal" id="ik"></div><div class="pal" id="pp"></div></div>
+<div class="row"><button class="btn" id="aview">see my page</button><button class="btn alt" id="aundo">undo</button><button class="btn alt" id="arst">reset page</button><button class="btn alt" data-close>back</button></div></dialog>
+
+<dialog id="d-hunt" aria-labelledby="tt"><h2 id="tt">the hidden garden</h2><p id="hc" role="status">5 left to find.</p><ul id="left" style="list-style:none;padding:0;margin:4px 0"></ul>
+<svg id="hv" viewBox="0 0 560 330" role="group" aria-label="A small garden with five hidden things"></svg>
+<div class="row"><button class="btn alt" id="hre">hide them again</button><button class="btn alt" data-close>back to the town</button></div></dialog>
+
+<div id="bow" aria-hidden="true"><svg width="26" height="18" viewBox="0 0 26 18"><g class="i" fill="#7a1f45"><path d="M13 9L2 2V16Z"/><path d="M13 9L24 2V16Z"/><circle cx="13" cy="9" r="3" fill="#F8E7ED"/></g></svg></div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches,W=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,150):ms));
+const INK='#260D19',S={read:false,joke:false,busy:false};
+// The letter: one immutable source string, rendered only via textContent.
+const LETTER="HEY BABY, HAPPY BIRTHDAY MERI JAAN, currently tw i am still working on the website and i have finally reached a point to where i am now writing this letter to you. The day we started talking i thought to myself about what if, its not possible i know because i am far from the guy that believed in love and relationships overall, but WHAT IF this woman and i genuinely end up as something in some other life or something, i brushed it off, told myself i was overthinking or just dumb for thinking itta for no reason because i mean baat hi abhi shuru huwi hay and we are just talking about casual stuff. Over the span of almost 2 months, you have gotten closer to me than i have ever let anyone get, you mean so much to me that i cant even put it into words. I'm grateful everyday for the day you came into my life, i know i'm far from your ideal man and i'm sure you had quite alot of expectations for who you would want to spend your life with but trust me i'm trying and i will keep trying, to treat you how u would want to be treated, to reassure you how you would want to be reassured, and to admire you how you would want to be admired You said you don't really get excited over your birthdays anymore and that you really wanted to spend your birthday different from last year, you deserve to feel special afterall its YOUR 20TH BIRTHDAY COME ON, AND YES I TOOK IT AS MY SOLE RESPONSIBILITY to make you realize how special you are and how much you really mean to me. IM SORRY i know mene kaafi yap kiya hay, i just tried to put into words how deeply i feel for you even though i know that isn't really possible. TO END IT OFF, HAPPY BIRTHDAY ONCE AGAIN MILADY, YOU TRULY DESERVE THE WORLD, MWAH MWAH.\nYours truly, aapka biggest supporter";
+Object.freeze([LETTER]);
+
+/* ---------- flowers ---------- */
+const rose=c=>`<g class="i"><circle r="18" fill="${c}"/><path d="M-10 -2Q-8 -13 2 -12Q12 -10 10 0Q8 11 -2 10Q-9 8 -5 0Q-2 -6 3 -3" fill="none"/></g>`;
+const HEAD={
+ sun:()=>{let p='';for(let i=0;i<12;i++)p+=`<ellipse cy="-17" rx="5" ry="10" transform="rotate(${i*30})" fill="#F4DFA8"/>`;return `<g class="i">${p}<circle r="9" fill="#7a1f45"/></g>`},
+ lily:()=>{let p='';for(let i=0;i<6;i++)p+=`<path d="M0 0C-9-8-7-22 0-28C7-22 9-8 0 0Z" transform="rotate(${i*60})" fill="#F2A6C4"/>`;return `<g class="i">${p}<circle r="3" fill="#7a1f45"/></g>`},
+ wrose:()=>rose('#FFFFFF'),prose:()=>rose('#EFA3BF')};
+const NAME={sun:'sunflower',lily:'pink lily',wrose:'white rose',prose:'pink rose'};
+const stem=(x,y,bx,by)=>{const d=`M${x} ${y}Q${(x+bx)/2} ${(y+by)/2+14} ${bx} ${by}`;return `<path d="${d}" stroke="${INK}" stroke-width="6.5" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#8FA583" stroke-width="3" fill="none" stroke-linecap="round"/>`};
+const BQ=[['lily',200,70],['sun',130,115],['sun',270,112],['lily',92,178],['lily',308,175],['wrose',175,150],['prose',228,155],['wrose',145,205],['prose',255,205]];
+function buildBq(){$('#bq').innerHTML=`<path class="i" d="M200 330C120 300 70 250 60 215C110 220 160 260 200 330ZM200 330C280 300 330 250 340 215C290 220 240 260 200 330Z" fill="#8FA583"/>`+BQ.map(f=>stem(f[1],f[2],200,320)).join('')+BQ.map((f,i)=>`<g transform="translate(${f[1]} ${f[2]}) scale(1.15)"><g class="pop" style="--i:${i}">${HEAD[f[0]]()}</g></g>`).join('')+`<path class="i" d="M105 245L295 245L238 390L162 390Z" fill="#E8DFF5"/><path class="i" d="M120 265L200 340L280 265L295 245L105 245Z" fill="#FFF5E9"/><path class="i" d="M152 335H248L240 365H160Z" fill="#7a1f45"/><path class="i" d="M200 350q-34-26-40-4t40 4q34-26 40-4t-40 4" fill="#7a1f45"/><path id="rib" class="i" d="M110 252Q200 300 290 252Q200 330 110 270Q200 360 290 290" stroke="#7a1f45" stroke-width="4"/>`}
+
+/* ---------- petals ---------- */
+function mk(c){const p=document.createElement('i');p.className='p '+c;p.addEventListener('animationend',()=>p.remove());document.body.append(p);return p}
+function burst(x,y,n){for(let i=0;i<n;i++){const p=mk('b'),a=Math.random()*6.28,d=80+Math.random()*160;p.style.left=x+'px';p.style.top=y+'px';p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d-40+'px');p.style.setProperty('--r',Math.random()*720+'deg')}}
+let pt;function startPetals(){clearInterval(pt);if(RM)return;pt=setInterval(()=>{if(!$('#town').classList.contains('on')&&!$('#end').classList.contains('on')){clearInterval(pt);return}if($$('.p.f').length<7){const p=mk('f');p.style.left=Math.random()*100+'vw';p.style.setProperty('--dx',(Math.random()*160-80)+'px');p.style.animationDuration=(9+Math.random()*6)+'s'}},1800)}
+
+/* ---------- scene control ---------- */
+function go(id){
+ if(id==='ring'&&!S.read)return; if(id==='end'&&!S.joke)return;
+ if(id==='gate')$('#gate').classList.remove('open');
+ if(id==='bouq'){S.busy=false;$('#bq').classList.remove('bloom','wrap');buildBq();$$('#bouq .btn').forEach(b=>b.disabled=false)}
+ if(id==='ring'){S.joke=false;S.busy=false;$('#rb').classList.remove('open');$('#rhint').hidden=false;['#l1','#l2'].forEach(s=>{$(s).textContent='';$(s).classList.remove('on')});$('#cont').hidden=true}
+ $$('.scene').forEach(s=>{const on=s.id===id;s.classList.toggle('on',on);s.inert=!on});
+ const sc=$('#'+id);sc.scrollTop=0;const h=$('[data-h]',sc);if(h){h.tabIndex=-1;setTimeout(()=>h.focus({preventScroll:true}),60)}
+ if(id==='town'||id==='end')startPetals();
+}
+$('#open').onclick=async()=>{if(S.busy)return;S.busy=true;$('#gate').classList.add('open');await W(1700);go('bouq')};
+$$('[data-acc]').forEach(b=>b.onclick=async()=>{
+ if(S.busy)return;S.busy=true;$$('#bouq .btn').forEach(x=>x.disabled=true);
+ const love=b.dataset.acc==='love',r=$('#bq').getBoundingClientRect();
+ $('#bq').classList.add(love?'wrap':'bloom');burst(r.left+r.width/2,r.top+r.height*.35,love?10:24);
+ await W(2300);go('town')});
+$('#again').onclick=()=>go('gate');
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);const c=e.target.closest('[data-close]');if(c)c.closest('dialog').close()});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const h=e.target.closest&&e.target.closest('g[role=button]');if(h){e.preventDefault();h.dispatchEvent(new MouseEvent('click',{bubbles:true}))}}});
+$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+
+/* ---------- town ---------- */
+const NOTES={studio:"a sketchbook, mid-drawing. every good thing starts as a few lines.",tv:"a tiny chemistry lab on screen. cozy science only.",guitar:"acoustic, unplugged, and probably playing something underrated.",memo:"a quiz she made for me, back when i was sad about messi.",car:"a little road trip. the blue one is just trying to keep up.",letter:"the lit window is open ♡"};
+const note=t=>{$('#note').textContent=t};
+function act(a,h){
+ if(a==='arr'){drawV();return $('#d-arr').showModal()}
+ if(a==='art'){drawA();sel();return $('#d-art').showModal()}
+ if(a==='hunt')return $('#d-hunt').showModal();
+ if(a==='letter')return go('letter');
+ if(a==='cat')return catTap(h);if(a==='studio')return studioTap();note(NOTES[a]);
+ 
+ if(a==='tv')$('.tv').classList.toggle('on');
+ if(a==='car')$('#cars').classList.toggle('go');
+ 
+ if(a==='guitar'){const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',230+Math.random()*50);t.setAttribute('y',335);t.setAttribute('class','nt');t.setAttribute('font-size','22');t.textContent='♪';t.addEventListener('animationend',()=>t.remove());$('#gn').append(t)}
+}
+$('#town svg').addEventListener('click',e=>{const h=e.target.closest('[data-a]');if(h)act(h.dataset.a,h)});
+
+/* ---------- arrange flowers ---------- */
+const SL=[[200,95],[140,110],[260,110],[100,155],[300,155],[175,145],[225,145],[145,190],[255,190],[200,175]];
+let V=[],fin=false;
+$('#pal').innerHTML=Object.keys(NAME).map(k=>`<button data-k="${k}" aria-label="Add ${NAME[k]}"><svg width="40" height="40" viewBox="-30 -30 60 60" aria-hidden="true">${HEAD[k]()}</svg>${NAME[k]}</button>`).join('');
+function drawV(){
+ $('#vs').innerHTML=V.map((t,i)=>stem(SL[i][0],SL[i][1],200,300)).join('')+V.map((t,i)=>`<g class="fv" data-i="${i}" ${fin?'':'tabindex="0" role="button"'} aria-label="${fin?NAME[t]:'Remove '+NAME[t]}" transform="translate(${SL[i][0]} ${SL[i][1]}) scale(1.1)"><circle r="30" fill="transparent"/>${HEAD[t]()}</g>`).join('')+`<path class="i" d="M145 285Q132 345 152 385H248Q268 345 255 285Z" fill="#E8DFF5"/><path class="i" d="M138 283H262" stroke-width="6"/><path d="M146 330H254" stroke="#7a1f45" stroke-width="12"/>`;
+ $$('#pal button').forEach(b=>b.disabled=fin);$('#vclr').disabled=fin;
+ $('#vm').textContent=fin?"it's beautiful ♡ and it stays right here.":V.length?V.length+(V.length===1?' flower':' flowers')+' in the vase':'the vase is empty.';
+ $('#vdone').textContent=fin?'keep arranging':"i'm finished";
+}
+$('#pal').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||fin)return;if(V.length>=SL.length){$('#vm').textContent='the vase is full. tap a flower to take it out.';return}V.push(b.dataset.k);drawV()});
+$('#vs').addEventListener('click',e=>{const f=e.target.closest('.fv');if(!f||fin)return;V.splice(+f.dataset.i,1);drawV();$('#pal button').focus()});
+$('#vclr').onclick=()=>{V=[];drawV()};
+$('#vdone').onclick=()=>{if(!V.length&&!fin){$('#vm').textContent='add a few flowers first ♡';return}fin=!fin;drawV()};
+
+/* ---------- cat & sketchbook house ---------- */
+let cn=0,ct1,ct2;
+function catTap(h){const s=cn++%3;clearTimeout(ct1);clearTimeout(ct2);h.classList.remove('yawn','blink','stretch');
+ h.classList.add('say',['yawn','blink','stretch'][s]);note('yawning aarhin haaaww');
+ ct1=setTimeout(()=>h.classList.remove('yawn','blink','stretch'),s===1?500:2000);ct2=setTimeout(()=>h.classList.remove('say'),3400)}
+let st=0;
+function studioTap(){const d=$$('.dd');
+ if(st===0){$('.sk').classList.add('on');note(NOTES.studio)}else if(st<=d.length){d[st-1].classList.add('c');note('a doodle just got its colours.')}else note('all coloured in.');st++}
+
+/* ---------- little art studio ---------- */
+const AK={sun:'sunflower',lily:'pink lily',wrose:'white rose',prose:'pink rose',bow:'bow',star:'star',heart:'heart',squig:'squiggle',x:'eraser'};
+const IC=[['burgundy','#7a1f45'],['pink','#E7A3BE'],['sunflower','#F4DFA8'],['lavender','#B9A3E0']],PP=[['cream','#FFF5E9'],['blush','#F8E7ED'],['lavender','#E8DFF5'],['sunflower','#F4DFA8']];
+const STAMP=(k,c)=>HEAD[k]?HEAD[k]():k==='bow'?`<g class="i" fill="${c}"><path d="M0 0L-16-9V9Z"/><path d="M0 0L16-9V9Z"/><circle r="3.5"/></g>`:k==='star'?`<path class="i" d="M0-13L3.5-4 13-4 5.5 2 8 12 0 6-8 12-5.5 2-13-4-3.5-4Z" fill="${c}"/>`:k==='heart'?`<path class="i" d="M0 9C-15-2-10-13-4-11 0-10 0-7 0-7S0-10 4-11C10-13 15-2 0 9Z" fill="${c}"/>`:`<path d="M-16 0q4-9 8 0t8 0 8 0 8 0" fill="none" style="stroke:${c};stroke-width:3;stroke-linecap:round"/>`;
+const AR={it:[],tool:'sun',ink:IC[0][1],pap:PP[0][1],x:200,y:140,view:false};
+const dot=c=>`<svg width="36" height="36" viewBox="-30 -30 60 60" aria-hidden="true"><circle r="18" fill="${c}" stroke="${INK}" stroke-width="3"/></svg>`;
+$('#tl').innerHTML=Object.keys(AK).map(k=>`<button data-t="${k}" aria-pressed="false"><svg width="36" height="36" viewBox="-30 -30 60 60" aria-hidden="true">${k==='x'?`<path d="M-16-16L16 16M16-16L-16 16" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`:STAMP(k,'#7a1f45')}</svg>${AK[k]}</button>`).join('');
+$('#ik').innerHTML=IC.map(c=>`<button data-c="${c[1]}" aria-pressed="false">${dot(c[1])}${c[0]} ink</button>`).join('');
+$('#pp').innerHTML=PP.map(c=>`<button data-p="${c[1]}" aria-pressed="false">${dot(c[1])}${c[0]} paper</button>`).join('');
+const am=t=>{$('#am').textContent=t};
+function sel(){$$('#tl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===AR.tool));$$('#ik button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===AR.ink));$$('#pp button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===AR.pap))}
+function drawA(){$('#pg').innerHTML=`<rect width="400" height="280" fill="${AR.pap}" stroke="${INK}" stroke-width="4"/><rect x="12" y="12" width="376" height="256" fill="none" stroke="${INK}" stroke-opacity=".25" stroke-dasharray="4 4"/>`+AR.it.map((o,i)=>`<g class="it" data-i="${i}" transform="translate(${o.x} ${o.y}) scale(${o.s})">${STAMP(o.k,o.c)}</g>`).join('')+`<circle class="car" cx="${AR.x}" cy="${AR.y}" r="18"/>`}
+function place(x,y){if(AR.view||AR.tool==='x')return;if(AR.it.length>=60){am('the page is full. erase or undo something.');return}
+ AR.it.push({k:AR.tool,x:Math.round(x),y:Math.round(y),s:HEAD[AR.tool]?1:1.4,c:AR.ink});drawA();am(AK[AR.tool]+' added.')}
+$('#pg').addEventListener('click',e=>{if(AR.view)return;const it=e.target.closest('.it');
+ if(AR.tool==='x'){if(it){AR.it.splice(+it.dataset.i,1);drawA();am('erased.')}return}
+ const p=$('#pg'),pt=p.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(p.getScreenCTM().inverse());AR.x=q.x;AR.y=q.y;place(q.x,q.y)});
+$('#pg').addEventListener('keydown',e=>{const m={ArrowLeft:[-20,0],ArrowRight:[20,0],ArrowUp:[0,-20],ArrowDown:[0,20]}[e.key];
+ if(m){e.preventDefault();AR.x=Math.min(380,Math.max(20,AR.x+m[0]));AR.y=Math.min(260,Math.max(20,AR.y+m[1]));return drawA()}
+ if(e.key==='Enter'||e.key===' '){e.preventDefault();if(AR.view)return;
+  if(AR.tool==='x'){let b=-1,bd=900;AR.it.forEach((o,i)=>{const d=(o.x-AR.x)**2+(o.y-AR.y)**2;if(d<bd){bd=d;b=i}});if(b>=0){AR.it.splice(b,1);drawA();am('erased.')}}else place(AR.x,AR.y)}});
+$('#atools').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.t)AR.tool=b.dataset.t;if(b.dataset.c)AR.ink=b.dataset.c;if(b.dataset.p){AR.pap=b.dataset.p;drawA()}sel()});
+$('#aundo').onclick=()=>{AR.it.pop();drawA()};
+$('#arst').onclick=()=>{AR.it=[];AR.pap=PP[0][1];drawA();sel();am('a fresh page.')};
+$('#aview').onclick=()=>{AR.view=!AR.view;$('#atools').hidden=AR.view;$('#aundo').hidden=AR.view;$('#aview').textContent=AR.view?'keep drawing':'see my page';am(AR.view?'your page ♡':'pick something, then tap the page.')};
+
+/* ---------- hidden garden ---------- */
+const HO=[['bow','a bow'],['pick','a guitar pick'],['flower','a flower'],['ball','a football'],['car','a miniature car']];
+let found=new Set();
+function buildHunt(){found=new Set();$('#hv').innerHTML=`<rect width="560" height="330" fill="#FFF5E9"/><g style="pointer-events:none"><path class="i" d="M0 70Q40 40 80 70T160 65T240 70T320 62T400 70T480 64T560 70V175H0Z" fill="#8FA583"/><path class="i" d="M0 230Q280 200 560 230V330H0Z" fill="#B9CBAA"/><g class="i" fill="#FFF5E9">${[20,90,160,230,300,370,440,510].map(x=>`<path d="M${x} 235V160l24-14 24 14v75z"/>`).join('')}</g></g>
+<g class="ho" data-k="flower" tabindex="0" role="button" aria-label="A hidden flower"><circle cx="470" cy="112" r="24" fill="transparent"/><g transform="translate(470 112) scale(.55)">${HEAD.lily()}</g></g>
+<g class="ho" data-k="bow" tabindex="0" role="button" aria-label="A hidden bow"><circle cx="85" cy="268" r="24" fill="transparent"/><g class="i" fill="#E7A3BE" transform="translate(85 268)"><path d="M0 0L-18-10V10Z"/><path d="M0 0L18-10V10Z"/><circle r="4" fill="#7a1f45"/></g></g>
+<g class="ho" data-k="ball" tabindex="0" role="button" aria-label="A hidden football"><circle cx="205" cy="268" r="24" fill="transparent"/><circle class="i" cx="205" cy="266" r="14" fill="#fff"/><path class="i" d="M205 259l6 4-2 7h-8l-2-7z" fill="#260D19"/></g>
+<g class="ho" data-k="car" tabindex="0" role="button" aria-label="A hidden miniature car"><circle cx="425" cy="290" r="26" fill="transparent"/><g class="i"><path d="M404 296V284Q408 274 420 274H436Q446 274 450 284V296Z" fill="#c2334d"/><circle cx="414" cy="298" r="5" fill="#260D19"/></g><circle cx="413" cy="283" r="3.2" fill="#fff"/><circle cx="423" cy="283" r="3.2" fill="#fff"/><circle cx="414" cy="283" r="1.4" fill="#260D19"/><circle cx="424" cy="283" r="1.4" fill="#260D19"/></g>
+<g class="ho" data-k="pick" tabindex="0" role="button" aria-label="A hidden guitar pick"><circle cx="330" cy="298" r="24" fill="transparent"/><path class="i" transform="translate(330 298)" d="M0-10C10-10 14-2 0 12C-14-2-10-10 0-10Z" fill="#7a1f45"/></g>
+<g style="pointer-events:none"><g class="i"><rect x="150" y="248" width="120" height="12" rx="3" fill="#E8DFF5"/><path d="M162 260v26M258 260v26" fill="none"/></g>
+<path class="i" d="M28 300Q85 262 142 300V312H28Z" fill="#5b2b3c"/><path class="i" d="M50 285q10-24 22 0M100 285q10-24 22 0" fill="#8FA583"/>
+<ellipse class="i" cx="470" cy="296" rx="38" ry="28" fill="#8FA583"/><circle class="i" cx="458" cy="286" r="5" fill="#fff"/><circle class="i" cx="482" cy="300" r="5" fill="#F4DFA8"/></g><g id="bg"></g>`;lst()}
+function lst(){const n=5-found.size;$('#hc').textContent=n?`${n} left to find.`:'all five found!';$('#left').innerHTML=HO.map(o=>`<li class="${found.has(o[0])?'fnd':''}">${found.has(o[0])?'✓':'○'} ${o[1]}</li>`).join('')}
+$('#hv').addEventListener('click',e=>{const o=e.target.closest('.ho');if(!o||found.has(o.dataset.k))return;found.add(o.dataset.k);o.classList.add('found');lst();
+ if(found.size===5){$('#hc').textContent='all five found! a little sunflower grew in the middle of the garden ♡';$('#bg').innerHTML=`<g id="bonus"><path d="M300 240V190" stroke="${INK}" stroke-width="7" fill="none"/><path d="M300 240V190" stroke="#8FA583" stroke-width="3.5"/><g transform="translate(300 175) scale(1.3)">${HEAD.sun()}</g></g>`}});
+$('#hre').onclick=buildHunt;
+
+/* ---------- letter & ring ---------- */
+$('#env').onclick=()=>{$('#env').hidden=true;$('#paper').hidden=false;$('#lt').textContent=LETTER;$('#paper').focus({preventScroll:true});
+ const done=async()=>{await W(2500);S.read=true;$('#last').hidden=false};
+ if('IntersectionObserver'in window)new IntersectionObserver((en,ob)=>{if(en[0].isIntersecting){ob.disconnect();done()}},{root:$('#letter'),threshold:1}).observe($('#sent'));else setTimeout(done,20000)};
+$('#last').onclick=()=>go('ring');
+$('#rb').onclick=async()=>{if(S.busy||S.joke)return;S.busy=true;$('#rb').classList.add('open');$('#rhint').hidden=true;
+ await W(1100);$('#l1').textContent="relax, it's just a website… for now.";$('#l1').classList.add('on');
+ await W(3200);$('#l2').textContent="but i was very close to doing it 🤷‍♂️";$('#l2').classList.add('on');
+ await W(2200);S.joke=true;S.busy=false;$('#cont').hidden=false;$('#cont').focus()};
+$('#cont').onclick=()=>go('end');
+
+/* ---------- bow cursor ---------- */
+if(matchMedia('(pointer:fine)').matches){const b=$('#bow');let x=0,y=0,tx=0,ty=0;
+ addEventListener('pointermove',e=>{tx=e.clientX;ty=e.clientY;b.style.opacity=1;b.classList.toggle('hot',!!(e.target.closest&&e.target.closest('button,[role=button],a')))});
+ (function l(){x+=(tx-x)*.3;y+=(ty-y)*.3;b.style.transform=`translate(${x+14}px,${y+14}px)`;requestAnimationFrame(l)})()}
+/* ---------- black intro ---------- */
+(()=>{const el=$('#intro');let done=false;
+const end=()=>{if(done)return;done=true;el.classList.add('out');setTimeout(()=>el.remove(),RM?200:1800)};
+setTimeout(()=>el.classList.add('in'),RM?0:600);
+el.addEventListener('click',end);setTimeout(end,RM?1500:6500)})();
+buildBq();buildHunt();
+</script>
+</body>
+</html>
